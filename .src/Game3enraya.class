@@ -1,0 +1,242 @@
+' Gambas class file
+
+Public EstadoActual As New String[3, 3]
+Public JugadorTurno As String
+
+Public Sub _new()
+
+  Me.initializeGame()
+
+End
+
+Public Sub initializeGame()
+
+  Dim i, j As Integer
+
+  For i = 0 To 2
+    For j = 0 To 2
+      EstadoActual[i, j] = "."
+
+    Next
+  Next
+  Print ""
+  JugadorTurno = "X"
+
+End
+
+Public Sub drawBoard()
+
+  Dim i As Integer
+  Dim j As Integer
+
+  Me.EstadoActual[0, 0] = "X"
+  Me.EstadoActual[0, 1] = "X"
+
+  Me.EstadoActual[1, 1] = "O"
+  Me.EstadoActual[0, 2] = "O"
+
+  Print "----Tablero----"
+  For i = 0 To 2
+    Print "[";
+    For j = 0 To 2
+      Print Me.EstadoActual[i, j]; 'convierti la coordenada i,j en dimension 1
+    Next
+    Print "]"
+  Next
+
+End
+
+Public Function isValid(g As Game3enraya, px As Integer, py As Integer) As Boolean
+
+  If px < 0 Or px > 2 Or py < 0 Or py > 2 Then
+    Return False
+  Endif
+
+  If g.EstadoActual[px, py] = "." Then
+    Return True
+  Else
+    Return False
+  Endif
+
+End
+
+Public Function isEnd(g As Game3enraya) As String
+
+  Dim I As Integer
+  Dim J As Integer
+
+  'VERTICAL GANADOR
+  For I = 0 To 2
+    If Not (G.EstadoActual[0, I] = ".") And G.EstadoActual[0, I] = G.EstadoActual[1, I] And G.EstadoActual[1, I] = G.EstadoActual[2, I] Then
+      Return G.EstadoActual[0, I]
+    Endif
+  Next
+
+  'HORIZONTAL GANA
+  For I = 0 To 2
+    If G.EstadoActual[I, 0] = "X" And G.EstadoActual[I, 1] = "X" And G.EstadoActual[I, 2] = "X" Then Return "X"
+    If G.EstadoActual[I, 0] = "O" And G.EstadoActual[I, 1] = "O" And G.EstadoActual[I, 2] = "O" Then Return "O"
+  Next
+
+  'DIAOGONAL GANA
+  If Not (G.EstadoActual[0, 0] = ".") Then
+    If G.EstadoActual[0, 0] = "X" And G.EstadoActual[1, 1] = "X" And G.EstadoActual[2, 2] = "X" Then Return "X"
+    If G.EstadoActual[0, 0] = "O" And G.EstadoActual[1, 1] = "O" And G.EstadoActual[2, 2] = "O" Then Return "O"
+  Endif
+
+  If Not (G.EstadoActual[0, 2] = ".") Then
+    If G.EstadoActual[0, 2] = "X" And G.EstadoActual[1, 1] = "X" And G.EstadoActual[2, 0] = "X" Then Return "X"
+    If G.EstadoActual[0, 2] = "O" And G.EstadoActual[1, 1] = "O" And G.EstadoActual[2, 0] = "O" Then Return "O"
+  Endif
+
+  'ESTA EL TABLERO LLENO?
+  If InStr(g.EstadoActual.Join(), ".") > 0 Then
+    Return Null 'no esta lleno
+  Endif
+
+  'es empate (TABLAS) -> TABLERO LLENO
+  Return "."
+
+End
+
+Public Function MaxAlphaBeta(g As Game3enraya, alpha As Integer, beta As Integer) As Integer[]
+
+  Dim maxv, m, px, py As Integer
+  Dim result As String
+  Dim vector As New Integer[]
+  Dim i, j As Integer
+
+  maxv = -2
+  px = -1 'Null
+  py = -1 'Null
+  result = g.isEnd(g)
+
+  If result = "X" Then Return [-1, 0, 0] 'gana X
+  If result = "O" Then Return [1, 0, 0] 'gana O
+  If result = "." Then Return [0, 0, 0] 'empate
+
+  For i = 0 To 2
+    For j = 0 To 2
+      If g.EstadoActual[i, j] = "." Then
+        g.EstadoActual[i, j] = "O"
+        vector = g.MinAlphaBeta(Me, alpha, beta)
+        m = vector[0]
+        If m > maxv Then
+          maxv = m
+          px = i
+          py = j
+        Endif
+        g.EstadoActual[i, j] = "." 'retorno valor anterior
+
+        If maxv >= beta Then
+          Return [maxv, px, py]
+        Endif
+
+        If maxv > alpha Then
+          alpha = maxv
+        Endif
+
+      Endif
+    Next
+  Next
+
+  Return [maxv, px, py]
+
+End
+
+Public Function MinAlphaBeta(g As Game3enraya, alpha As Integer, beta As Integer) As Integer[]
+
+  Dim minv, m, qx, qy As Integer
+  Dim result As String
+  Dim vector As New Integer[]
+  Dim i, j As Integer
+
+  minv = 2
+  qx = -1 'Null
+  qy = -1 'Null
+
+  result = g.isEnd(g)
+
+  If result = "X" Then Return [-1, 0, 0] 'gana X
+  If result = "O" Then Return [1, 0, 0] 'gana O
+  If result = "." Then Return [0, 0, 0] 'empate
+
+  For i = 0 To 2
+    For j = 0 To 2
+      If g.EstadoActual[i, j] = "." Then
+        g.EstadoActual[i, j] = "X"
+        vector = g.MaxAlphaBeta(g, alpha, beta)
+        m = vector[0]
+
+        If m < minv Then
+          minv = m
+          qx = i
+          qy = j
+        Endif
+        g.EstadoActual[i, j] = "." 'retorno valor anterior
+
+        If minv <= alpha Then
+          Return [minv, qx, qy]
+        Endif
+
+        If minv < beta Then
+          beta = minv
+        Endif
+
+      Endif
+    Next
+  Next
+
+  Return [minv, qx, qy]
+
+End
+
+Public Sub playAlphaBeta()
+
+  Dim px, py, qx, qy As Integer
+
+  Dim result As String
+  Dim vector As Integer[]
+
+  While True
+    Me.drawBoard()
+    result = Me.isEnd(Me)
+
+    If Not (IsNull(result)) Then
+      If result = "X" Then Print "Ganador es X!"
+      If result = "O" Then Print "Ganador es O!"
+      If result = "." Then Print "Empate-Tablas"
+      Me.initializeGame()
+      Return
+    Endif
+
+    If Me.JugadorTurno = "X" Then
+      vector = Me.MinAlphaBeta(Me, -2, 2)
+      px = vector[1]
+      py = vector[2]
+      Print "Recomendado Movimiento: X ="; px; " Y="; py
+      Print "Inserta la coordenada X:"
+      Input px
+      Print "Inserta la coordenada Y:"
+      Input py
+
+      If Me.isValid(Me, px, py) Then
+        Me.EstadoActual[px, py] = "X"
+        Me.JugadorTurno = "O"
+        Continue
+      Else
+        Print "Movimiento invalido, pruebe otra vez"
+      Endif
+
+    Else
+      vector = Me.MaxAlphaBeta(Me, -2, 2)
+      px = vector[1]
+      py = vector[2]
+
+      Me.EstadoActual[px, py] = "O"
+      Me.JugadorTurno = "X"
+    Endif
+
+  Wend
+
+End

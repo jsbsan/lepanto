@@ -1,0 +1,9 @@
+' Gambas module file
+
+Public Sub main()
+
+  Dim g As New Game3enraya
+
+  g.playAlphaBeta()
+
+End

@@ -3,6 +3,7 @@
 # distinction between the basic Minimax and Minimax with
 # alpha-beta pruning :
 #https://stackabuse.com/minimax-and-alpha-beta-pruning-in-python/
+# Python3
 import time
 
 class Game:

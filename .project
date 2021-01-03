@@ -1,6 +1,6 @@
 # Gambas Project File 3.0
 Title=lepanto
-Startup=FMain
+Startup=modulo3enraya
 Icon=la real.png
 Version=0.0.1
 Component=gb.image
