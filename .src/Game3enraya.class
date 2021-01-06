@@ -2,6 +2,7 @@
 
 Public EstadoActual As New String[3, 3]
 Public JugadorTurno As String
+Private valorInfinito As Integer = 100000
 
 Public Sub _new()
 
@@ -21,6 +22,11 @@ Public Sub initializeGame()
   Next
   Print ""
   JugadorTurno = "X"
+  ' JugadorTurno = "O"
+  ' Me.EstadoActual[0, 0] = "X"
+  ' Me.EstadoActual[1, 0] = "X"
+  ' '
+  ' Me.EstadoActual[0, 1] = "O"
 
 End
 
@@ -28,12 +34,6 @@ Public Sub drawBoard()
 
   Dim i As Integer
   Dim j As Integer
-
-  Me.EstadoActual[0, 0] = "X"
-  Me.EstadoActual[0, 1] = "X"
-
-  Me.EstadoActual[1, 1] = "O"
-  Me.EstadoActual[0, 2] = "O"
 
   Print "----Tablero----"
   For i = 0 To 2
@@ -46,7 +46,7 @@ Public Sub drawBoard()
 
 End
 
-Public Function isValid(g As Game3enraya, px As Integer, py As Integer) As Boolean
+Fast Public Function isValid(g As Game3enraya, px As Integer, py As Integer) As Boolean
 
   If px < 0 Or px > 2 Or py < 0 Or py > 2 Then
     Return False
@@ -60,7 +60,7 @@ Public Function isValid(g As Game3enraya, px As Integer, py As Integer) As Boole
 
 End
 
-Public Function isEnd(g As Game3enraya) As String
+Fast Public Function isEnd(g As Game3enraya) As String
 
   Dim I As Integer
   Dim J As Integer
@@ -106,21 +106,31 @@ Public Function MaxAlphaBeta(g As Game3enraya, alpha As Integer, beta As Integer
   Dim vector As New Integer[]
   Dim i, j As Integer
 
-  maxv = -2
+  maxv = -(valorInfinito)
   px = -1 'Null
   py = -1 'Null
   result = g.isEnd(g)
 
-  If result = "X" Then Return [-1, 0, 0] 'gana X
-  If result = "O" Then Return [1, 0, 0] 'gana O
-  If result = "." Then Return [0, 0, 0] 'empate
+  If Not (result = "") Then
+    If result = "X" Then Return [-1000, 0, 0] 'gana X
+    If result = "O" Then Return [1000, 0, 0] 'gana O
+    If result = "." Then Return [0, 0, 0] 'empate
+  Endif
 
   For i = 0 To 2
     For j = 0 To 2
+
       If g.EstadoActual[i, j] = "." Then
         g.EstadoActual[i, j] = "O"
-        vector = g.MinAlphaBeta(Me, alpha, beta)
+        vector = g.minAlphaBeta(g, alpha, beta)
+
+        If i = 0 And j = 2 Then
+          Print "depurar", g.EstadoActual[i, j]
+          Print "Movimiento:"; i; j; " Valor: "; vector[0]
+        Endif
+
         m = vector[0]
+
         If m > maxv Then
           maxv = m
           px = i
@@ -151,21 +161,24 @@ Public Function MinAlphaBeta(g As Game3enraya, alpha As Integer, beta As Integer
   Dim vector As New Integer[]
   Dim i, j As Integer
 
-  minv = 2
+  minv = (valorInfinito)
   qx = -1 'Null
   qy = -1 'Null
 
   result = g.isEnd(g)
-
-  If result = "X" Then Return [-1, 0, 0] 'gana X
-  If result = "O" Then Return [1, 0, 0] 'gana O
-  If result = "." Then Return [0, 0, 0] 'empate
+  If Not (result = "") Then
+    If result = "X" Then Return [-1000, 0, 0] 'gana X
+    If result = "O" Then Return [1000, 0, 0] 'gana O
+    If result = "." Then Return [0, 0, 0] 'empate
+  Endif
 
   For i = 0 To 2
     For j = 0 To 2
+      Print i, j
       If g.EstadoActual[i, j] = "." Then
         g.EstadoActual[i, j] = "X"
         vector = g.MaxAlphaBeta(g, alpha, beta)
+        '  Print "Movimiento:"; i; j; " Valor: "; vector[0]
         m = vector[0]
 
         If m < minv Then
@@ -179,9 +192,10 @@ Public Function MinAlphaBeta(g As Game3enraya, alpha As Integer, beta As Integer
           Return [minv, qx, qy]
         Endif
 
-        If minv < beta Then
-          beta = minv
-        Endif
+        ' If minv < beta Then
+        '   beta = minv
+        '
+        ' Endif
 
       Endif
     Next
@@ -211,7 +225,7 @@ Public Sub playAlphaBeta()
     Endif
 
     If Me.JugadorTurno = "X" Then
-      vector = Me.MinAlphaBeta(Me, -2, 2)
+      vector = Me.MinAlphaBeta(Me, -valorinfinito, valorinfinito)
       px = vector[1]
       py = vector[2]
       Print "Recomendado Movimiento: X ="; px; " Y="; py
@@ -229,7 +243,7 @@ Public Sub playAlphaBeta()
       Endif
 
     Else
-      vector = Me.MaxAlphaBeta(Me, -2, 2)
+      vector = Me.minAlphaBeta(Me, -valorinfinito, valorinfinito)
       px = vector[1]
       py = vector[2]
 
@@ -238,5 +252,140 @@ Public Sub playAlphaBeta()
     Endif
 
   Wend
+
+End
+'---------------------------------------------------------------------------
+
+Public Sub playMiniMax()
+
+  Dim px, py, qx, qy As Integer
+
+  Dim result As String
+  Dim vector As Integer[]
+
+  While True
+    Me.drawBoard()
+    result = Me.isEnd(Me)
+
+    If Not (IsNull(result)) Then
+      If result = "X" Then Print "Ganador es X!"
+      If result = "O" Then Print "Ganador es O!"
+      If result = "." Then Print "Empate-Tablas"
+      Me.initializeGame()
+      Return
+    Endif
+
+    If Me.JugadorTurno = "X" Then
+      vector = Me.mini(Me)
+      px = vector[1]
+      py = vector[2]
+      Print "Recomendado Movimiento: X ="; px; " Y="; py
+      Print "Inserta la coordenada X:"
+      Input px
+      Print "Inserta la coordenada Y:"
+      Input py
+
+      If Me.isValid(Me, px, py) Then
+        Me.EstadoActual[px, py] = "X"
+        Me.JugadorTurno = "O"
+        Continue
+      Else
+        Print "Movimiento invalido, pruebe otra vez"
+      Endif
+
+    Else
+      vector = Me.maxi(Me)
+      px = vector[1]
+      py = vector[2]
+
+      Me.EstadoActual[px, py] = "O"
+      Me.JugadorTurno = "X"
+    Endif
+
+  Wend
+
+End
+
+Fast Public Function Mini(g As Game3enraya) As Integer[]
+
+  Dim minv, m, qx, qy As Integer
+  Dim result As String
+  Dim vector As New Integer[]
+  Dim i, j As Integer
+
+  minv = (valorInfinito)
+  qx = -1 'Null
+  qy = -1 'Null
+
+  result = g.isEnd(g)
+  If Not (result = "") Then
+    If result = "X" Then Return [-1000, 0, 0] 'gana X
+    If result = "O" Then Return [1000, 0, 0] 'gana O
+    If result = "." Then Return [0, 0, 0] 'empate
+  Endif
+
+  For i = 0 To 2
+    For j = 0 To 2
+      ' Print i, j
+      If g.EstadoActual[i, j] = "." Then
+        g.EstadoActual[i, j] = "X"
+        vector = g.maxi(g)
+        '  Print "Movimiento:"; i; j; " Valor: "; vector[0]
+        m = vector[0]
+
+        If m < minv Then
+          minv = m
+          qx = i
+          qy = j
+        Endif
+        g.EstadoActual[i, j] = "." 'retorno valor anterior
+
+      Endif
+    Next
+  Next
+
+  Return [minv, qx, qy]
+
+End
+
+Fast Public Function Maxi(g As Game3enraya) As Integer[]
+
+  Dim maxv, m, px, py As Integer
+  Dim result As String
+  Dim vector As New Integer[]
+  Dim i, j As Integer
+
+  maxv = -(valorInfinito)
+  px = -1 'Null
+  py = -1 'Null
+  result = g.isEnd(g)
+
+  If Not (result = "") Then
+    If result = "X" Then Return [-1000, 0, 0] 'gana X
+    If result = "O" Then Return [1000, 0, 0] 'gana O
+    If result = "." Then Return [0, 0, 0] 'empate
+  Endif
+
+  For i = 0 To 2
+    For j = 0 To 2
+
+      If g.EstadoActual[i, j] = "." Then
+        g.EstadoActual[i, j] = "O"
+        vector = g.mini(g)
+
+        m = vector[0]
+
+        If m > maxv Then
+          maxv = m
+          px = i
+          py = j
+        Endif
+        g.EstadoActual[i, j] = "." 'retorno valor anterior
+
+      Endif
+    Next
+  Next
+
+  Return [maxv, px, py]
 
 End

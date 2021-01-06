@@ -2,7 +2,7 @@
 Title=lepanto
 Startup=modulo3enraya
 Icon=la real.png
-Version=0.0.1
+Version=0.0.2
 Component=gb.image
 Component=gb.gui
 Component=gb.form
