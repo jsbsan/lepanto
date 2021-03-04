@@ -312,6 +312,9 @@ Fast Public Function Mini(g As Game3enraya) As Integer[]
   Dim result As String
   Dim vector As New Integer[]
   Dim i, j As Integer
+  Dim valorrama As Integer
+
+  valorRama = valorinfinito
 
   minv = (valorInfinito)
   qx = -1 'Null
@@ -332,6 +335,10 @@ Fast Public Function Mini(g As Game3enraya) As Integer[]
         vector = g.maxi(g)
         '  Print "Movimiento:"; i; j; " Valor: "; vector[0]
         m = vector[0]
+
+        ' If m > minv Then
+        '   Return [minv, qx, qy]
+        ' Endif
 
         If m < minv Then
           minv = m
@@ -354,10 +361,13 @@ Fast Public Function Maxi(g As Game3enraya) As Integer[]
   Dim result As String
   Dim vector As New Integer[]
   Dim i, j As Integer
+  Dim valorRama As Integer
 
   maxv = -(valorInfinito)
   px = -1 'Null
   py = -1 'Null
+
+  valorRama = -valorinfinito
   result = g.isEnd(g)
 
   If Not (result = "") Then
@@ -374,6 +384,11 @@ Fast Public Function Maxi(g As Game3enraya) As Integer[]
         vector = g.mini(g)
 
         m = vector[0]
+
+        'podo
+        ' If m < maxv Then
+        '   Return [maxv, px, py]
+        ' Endif
 
         If m > maxv Then
           maxv = m
